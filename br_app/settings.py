@@ -1,10 +1,36 @@
-import os
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(dotenv_path=BASE_DIR / ".env", override=False)
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only")
 DEBUG = os.environ.get("DEBUG", "0") == "1"
-ALLOWED_HOSTS = ["*"]  # depois afinamos
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com"]
+CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com"]
+
+DB_NAME = os.getenv("DB_NAME")
+if DB_NAME:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": DB_NAME,
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": os.getenv("DB_PORT", "5432"),
+            "OPTIONS": {"sslmode": "require"},
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 """
 Django settings for br_app project.
