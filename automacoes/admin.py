@@ -1,11 +1,9 @@
 from django.contrib import admin
-
-from django.contrib import admin
 from .models import Automacao
 
 @admin.register(Automacao)
 class AutomacaoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nome', 'status', 'criado_em', 'atualizado_em')
-    list_filter = ('status', 'criado_em')
-    search_fields = ('nome', 'descricao')
-    ordering = ('-criado_em',)
+    list_display  = ('id', 'tipo', 'projeto', 'status', 'dry_run', 'started_at', 'finished_at')
+    list_filter   = ('status', 'tipo', 'dry_run', 'started_at')
+    search_fields = ('tipo', 'projeto', 'mensagem')
+    readonly_fields = ('started_at', 'finished_at')
