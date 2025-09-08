@@ -1,36 +1,36 @@
 from django.db import models
+from django.utils import timezone
+
 
 class Automacao(models.Model):
-    STATUS_PENDENTE   = 'pendente'
-    STATUS_EXECUCAO   = 'execucao'
-    STATUS_CONCLUIDA  = 'concluida'
-    STATUS_FALHOU     = 'falhou'
-    STATUS_PAUSADA    = 'pausada'
-    
-    STATUS_CHOICES = [
-        (STATUS_PENDENTE,  'Pendente'),
-        (STATUS_EXECUCAO,  'Em execução'),
-        (STATUS_CONCLUIDA, 'Concluída'),
-        (STATUS_FALHOU,    'Falhou'),
-        (STATUS_PAUSADA,   'Pausada'),
-    ]
+    class Tipo(models.TextChoices):
+        SYNC_SHEET = "sync_sheet", "sync_sheet"
 
-    tipo        = models.CharField(max_length=50, default='sync_sheet')  # qual automação
-    projeto     = models.CharField(max_length=120, blank=True)           # opcional (ex.: SEDUC TEC 1.0)
-    dry_run     = models.BooleanField(default=False)
-    status      = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDENTE)
+    class Status(models.TextChoices):
+        PENDENTE    = "pendente", "Pendente"
+        EM_EXECUCAO = "em_execucao", "Em execução"
+        CONCLUIDA   = "concluida", "Concluída"
+        FALHOU      = "falhou", "Falhou"
+        PAUSADA     = "pausada", "Pausada"
 
-    started_at  = models.DateTimeField(auto_now_add=True)
-    finished_at = models.DateTimeField(null=True, blank=True)
+    tipo = models.CharField(max_length=32, choices=Tipo.choices)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDENTE,
+    )
+    projeto = models.CharField(max_length=200, blank=True, null=True)
+    dry_run = models.BooleanField(default=False)
 
-    mensagem    = models.TextField(blank=True)   # resumo/log
-    sucesso     = models.PositiveIntegerField(default=0)
-    erros       = models.PositiveIntegerField(default=0)
+    mensagem = models.TextField(blank=True, default="")
+    erros = models.TextField(blank=True, default="")
+    sucesso = models.BooleanField(default=False)
 
-    class Meta:
-        verbose_name = 'Automação'
-        verbose_name_plural = 'Automações'
-        ordering = ['-started_at']
+    started_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return f'{self.tipo} [{self.get_status_display()}] {self.started_at:%d/%m %H:%M}'
+        return f"{self.tipo} ({self.status})"
+
+    class Meta:
+        ordering = ("-started_at",)
